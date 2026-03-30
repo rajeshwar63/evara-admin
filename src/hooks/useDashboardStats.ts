@@ -9,8 +9,6 @@ import {
   getDocumentCountThisMonth,
   getDocumentsByType,
   getTotalStorageUsed,
-  getActiveRemindersCount,
-  getSearchCountToday,
   getAvgDocsPerUser,
 } from '../lib/queries'
 
@@ -24,8 +22,6 @@ export interface DashboardStats {
   docsThisMonth: number
   docsByType: { message_type: string; count: number }[]
   totalStorage: number
-  activeReminders: number
-  searchesToday: number
   avgDocsPerUser: number
   isLoading: boolean
   error: string
@@ -44,8 +40,6 @@ export function useDashboardStats(): DashboardStats {
     docsThisMonth: 0,
     docsByType: [] as { message_type: string; count: number }[],
     totalStorage: 0,
-    activeReminders: 0,
-    searchesToday: 0,
     avgDocsPerUser: 0,
   })
   const [isLoading, setIsLoading] = useState(true)
@@ -66,8 +60,6 @@ export function useDashboardStats(): DashboardStats {
       getDocumentCountThisMonth(),
       getDocumentsByType(),
       getTotalStorageUsed(),
-      getActiveRemindersCount(),
-      getSearchCountToday(),
       getAvgDocsPerUser(),
     ])
 
@@ -86,9 +78,7 @@ export function useDashboardStats(): DashboardStats {
       docsThisMonth: getValue(6, 0),
       docsByType: getValue(7, []),
       totalStorage: getValue(8, 0),
-      activeReminders: getValue(9, 0),
-      searchesToday: getValue(10, 0),
-      avgDocsPerUser: getValue(11, 0),
+      avgDocsPerUser: getValue(9, 0),
     })
 
     const failedCount = results.filter(r => r.status === 'rejected').length

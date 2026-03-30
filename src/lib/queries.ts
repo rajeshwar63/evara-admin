@@ -188,6 +188,66 @@ export async function getRecentActivity(limit: number = 20): Promise<ActivityEnt
   }
 }
 
+export interface UserDetail {
+  phone_number: string
+  plan: string
+  created_at: string
+  doc_count: number
+  storage_used: number
+  last_active: string | null
+}
+
+export async function getAllUsers(): Promise<UserDetail[]> {
+  try {
+    // Get all users
+    const { data: users } = await supabase
+      .from('users')
+      .select('phone_number, plan, created_at')
+      .order('created_at', { ascending: false })
+
+    if (!users || users.length === 0) return []
+
+    // Get document counts per user
+    const { data: docs } = await supabase
+      .from('documents')
+      .select('phone_number, file_size_bytes')
+
+    // Get last activity per user
+    const { data: messages } = await supabase
+      .from('messages_log')
+      .select('phone_number, created_at')
+      .order('created_at', { ascending: false })
+
+    // Aggregate doc counts and storage per user
+    const docStats: Record<string, { count: number; storage: number }> = {}
+    for (const doc of docs ?? []) {
+      const phone = doc.phone_number
+      if (!docStats[phone]) docStats[phone] = { count: 0, storage: 0 }
+      docStats[phone].count++
+      docStats[phone].storage += doc.file_size_bytes || 0
+    }
+
+    // Get last active per user
+    const lastActive: Record<string, string> = {}
+    for (const msg of messages ?? []) {
+      if (!lastActive[msg.phone_number]) {
+        lastActive[msg.phone_number] = msg.created_at
+      }
+    }
+
+    return users.map(user => ({
+      phone_number: user.phone_number,
+      plan: user.plan || 'free',
+      created_at: user.created_at,
+      doc_count: docStats[user.phone_number]?.count ?? 0,
+      storage_used: docStats[user.phone_number]?.storage ?? 0,
+      last_active: lastActive[user.phone_number] ?? null,
+    }))
+  } catch {
+    return []
+  }
+}
+
 export async function getAvgDocsPerUser(): Promise<number> {
   try {
     const { count: docCount } = await supabase
