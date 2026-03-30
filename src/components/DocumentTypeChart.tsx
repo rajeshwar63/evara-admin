@@ -36,11 +36,11 @@ export function DocumentTypeChart({
     )
   }
 
-  if (!data || !Array.isArray(data)) {
+  if (!data || !Array.isArray(data) || data.length === 0) {
     return (
       <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
         <h3 className="text-base font-heading font-semibold text-slate-900 mb-6">Documents Processed</h3>
-        <div className="h-48 flex items-center justify-center text-slate-400 text-sm">No data available</div>
+        <div className="h-48 flex items-center justify-center text-slate-400 text-sm">No data yet</div>
       </div>
     )
   }

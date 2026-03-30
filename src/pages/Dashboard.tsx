@@ -14,6 +14,7 @@ import { StatCard } from '../components/StatCard'
 import { UserGrowthChart } from '../components/UserGrowthChart'
 import { PlanDistribution } from '../components/PlanDistribution'
 import { DocumentTypeChart } from '../components/DocumentTypeChart'
+import { ChartErrorBoundary } from '../components/ChartErrorBoundary'
 import { RecentActivity } from '../components/RecentActivity'
 import { useDashboardStats } from '../hooks/useDashboardStats'
 
@@ -82,19 +83,25 @@ export function Dashboard() {
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <UserGrowthChart data={stats.userGrowth || []} isLoading={stats.isLoading} />
-        <PlanDistribution data={stats.planDistribution || []} isLoading={stats.isLoading} />
+        <ChartErrorBoundary>
+          <UserGrowthChart data={stats.userGrowth || []} isLoading={stats.isLoading} />
+        </ChartErrorBoundary>
+        <ChartErrorBoundary>
+          <PlanDistribution data={stats.planDistribution || []} isLoading={stats.isLoading} />
+        </ChartErrorBoundary>
       </div>
 
       {/* Documents & Quick Stats Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <DocumentTypeChart
-          data={stats.documentsByType || []}
-          docsToday={stats.docsToday}
-          docsThisWeek={stats.docsThisWeek}
-          docsThisMonth={stats.docsThisMonth}
-          isLoading={stats.isLoading}
-        />
+        <ChartErrorBoundary>
+          <DocumentTypeChart
+            data={stats.documentsByType || []}
+            docsToday={stats.docsToday}
+            docsThisWeek={stats.docsThisWeek}
+            docsThisMonth={stats.docsThisMonth}
+            isLoading={stats.isLoading}
+          />
+        </ChartErrorBoundary>
 
         {/* Quick Stats Grid */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
