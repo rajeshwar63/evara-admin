@@ -29,6 +29,15 @@ export function PlanDistribution({ data, isLoading }: PlanDistributionProps) {
     )
   }
 
+  if (!data || !Array.isArray(data)) {
+    return (
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+        <h3 className="text-base font-heading font-semibold text-slate-900 mb-6">Plan Distribution</h3>
+        <div className="h-64 flex items-center justify-center text-slate-400 text-sm">No data available</div>
+      </div>
+    )
+  }
+
   const total = data.reduce((sum, d) => sum + d.count, 0)
   const chartData = data.map(d => ({
     name: PLAN_LABELS[d.plan] || d.plan,

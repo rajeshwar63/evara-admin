@@ -23,6 +23,15 @@ export function UserGrowthChart({ data, isLoading }: UserGrowthChartProps) {
     )
   }
 
+  if (!data || !Array.isArray(data)) {
+    return (
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+        <h3 className="text-base font-heading font-semibold text-slate-900 mb-6">User Growth (Last 30 Days)</h3>
+        <div className="h-64 flex items-center justify-center text-slate-400 text-sm">No data available</div>
+      </div>
+    )
+  }
+
   const formatted = data.map(d => ({
     ...d,
     label: new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),

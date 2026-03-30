@@ -37,7 +37,7 @@ export function RecentActivity() {
   const fetchActivity = useCallback(async () => {
     try {
       const data = await getRecentActivity(20)
-      setActivities(data)
+      setActivities(data || [])
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load activity')
