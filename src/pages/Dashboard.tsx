@@ -20,8 +20,6 @@ import {
   Crown,
   FileText,
   HardDrive,
-  Bell,
-  Search,
   TrendingUp,
   RefreshCw,
 } from 'lucide-react'
@@ -267,7 +265,7 @@ export default function Dashboard() {
       </div>
 
       {/* Quick stats grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <StatCard
           icon={<FileText size={18} />}
           label="Docs Today"
@@ -284,18 +282,6 @@ export default function Dashboard() {
           icon={<HardDrive size={18} />}
           label="Storage Used"
           value={formatBytes(stats.totalStorage)}
-          isLoading={stats.isLoading}
-        />
-        <StatCard
-          icon={<Bell size={18} />}
-          label="Active Reminders"
-          value={stats.activeReminders}
-          isLoading={stats.isLoading}
-        />
-        <StatCard
-          icon={<Search size={18} />}
-          label="Searches Today"
-          value={stats.searchesToday}
           isLoading={stats.isLoading}
         />
         <StatCard

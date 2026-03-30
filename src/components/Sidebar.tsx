@@ -1,13 +1,10 @@
-import { LayoutDashboard, Users, FileText, Bell, Search, DollarSign, LogOut } from 'lucide-react'
+import { LayoutDashboard, Users, LogOut } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import { Link, useLocation } from 'react-router-dom'
 
 const navItems = [
-  { label: 'Dashboard', icon: LayoutDashboard, active: true },
-  { label: 'Users', icon: Users, soon: true },
-  { label: 'Documents', icon: FileText, soon: true },
-  { label: 'Reminders', icon: Bell, soon: true },
-  { label: 'Search Analytics', icon: Search, soon: true },
-  { label: 'Revenue', icon: DollarSign, soon: true },
+  { label: 'Dashboard', icon: LayoutDashboard, path: '/' },
+  { label: 'Users', icon: Users, path: '/users' },
 ]
 
 interface SidebarProps {
@@ -17,6 +14,7 @@ interface SidebarProps {
 
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const { user, logout } = useAuth()
+  const location = useLocation()
 
   return (
     <>
@@ -44,28 +42,21 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         <nav className="flex-1 px-3 py-4 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon
-            if (item.soon) {
-              return (
-                <div
-                  key={item.label}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-500 cursor-not-allowed"
-                >
-                  <Icon size={18} />
-                  <span className="text-sm">{item.label}</span>
-                  <span className="ml-auto text-[10px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded">
-                    Soon
-                  </span>
-                </div>
-              )
-            }
+            const isActive = location.pathname === item.path
             return (
-              <div
+              <Link
                 key={item.label}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#1E293B] text-white cursor-pointer"
+                to={item.path}
+                onClick={onClose}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                  isActive
+                    ? 'bg-[#1E293B] text-white'
+                    : 'text-slate-400 hover:bg-[#1E293B] hover:text-white'
+                }`}
               >
                 <Icon size={18} />
                 <span className="text-sm font-medium">{item.label}</span>
-              </div>
+              </Link>
             )
           })}
         </nav>
