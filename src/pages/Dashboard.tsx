@@ -82,14 +82,14 @@ export function Dashboard() {
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <UserGrowthChart data={stats.userGrowth} isLoading={stats.isLoading} />
-        <PlanDistribution data={stats.planDistribution} isLoading={stats.isLoading} />
+        <UserGrowthChart data={stats.userGrowth || []} isLoading={stats.isLoading} />
+        <PlanDistribution data={stats.planDistribution || []} isLoading={stats.isLoading} />
       </div>
 
       {/* Documents & Quick Stats Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <DocumentTypeChart
-          data={stats.documentsByType}
+          data={stats.documentsByType || []}
           docsToday={stats.docsToday}
           docsThisWeek={stats.docsThisWeek}
           docsThisMonth={stats.docsThisMonth}

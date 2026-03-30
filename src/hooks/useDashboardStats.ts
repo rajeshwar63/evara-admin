@@ -49,21 +49,7 @@ export function useDashboardStats() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const [
-        totalUsers,
-        planDist,
-        newUsersThisWeek,
-        userGrowth,
-        docsToday,
-        docsThisWeek,
-        docsThisMonth,
-        documentsByType,
-        totalStorage,
-        activeReminders,
-        searchesToday,
-        avgDocsPerUser,
-        recentActivity,
-      ] = await Promise.all([
+      const results = await Promise.allSettled([
         queries.getUserCount(),
         queries.getUserCountByPlan(),
         queries.getNewUsersThisWeek(),
@@ -79,32 +65,42 @@ export function useDashboardStats() {
         queries.getRecentActivity(20),
       ])
 
+      const getValue = <T,>(index: number, fallback: T): T => {
+        const result = results[index]
+        return result.status === 'fulfilled' ? (result.value as T) : fallback
+      }
+
+      const planDist = getValue(1, [] as { plan: string; count: number }[])
       const freeUsers = planDist.find(p => p.plan === 'free')?.count ?? 0
       const trialUsers = planDist.find(p => p.plan === 'trial')?.count ?? 0
       const paidUsers = planDist
         .filter(p => p.plan === 'individual' || p.plan === 'family')
         .reduce((sum, p) => sum + p.count, 0)
 
+      const failedQueries = results.filter(r => r.status === 'rejected')
+
       setStats({
-        totalUsers,
+        totalUsers: getValue(0, 0),
         freeUsers,
         trialUsers,
         paidUsers,
-        newUsersThisWeek,
-        userGrowth,
+        newUsersThisWeek: getValue(2, 0),
+        userGrowth: getValue(3, []),
         planDistribution: planDist,
-        documentsByType,
-        docsToday,
-        docsThisWeek,
-        docsThisMonth,
-        activeReminders,
-        searchesToday,
-        totalStorage,
-        avgDocsPerUser,
-        recentActivity,
+        documentsByType: getValue(7, []),
+        docsToday: getValue(4, 0),
+        docsThisWeek: getValue(5, 0),
+        docsThisMonth: getValue(6, 0),
+        activeReminders: getValue(9, 0),
+        searchesToday: getValue(10, 0),
+        totalStorage: getValue(8, 0),
+        avgDocsPerUser: getValue(11, 0),
+        recentActivity: getValue(12, []),
         lastUpdated: new Date(),
         isLoading: false,
-        error: null,
+        error: failedQueries.length > 0
+          ? `${failedQueries.length} queries failed`
+          : null,
       })
     } catch (err) {
       setStats(prev => ({

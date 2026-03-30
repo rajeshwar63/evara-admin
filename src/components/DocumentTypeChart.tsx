@@ -36,6 +36,15 @@ export function DocumentTypeChart({
     )
   }
 
+  if (!data || !Array.isArray(data)) {
+    return (
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+        <h3 className="text-base font-heading font-semibold text-slate-900 mb-6">Documents Processed</h3>
+        <div className="h-48 flex items-center justify-center text-slate-400 text-sm">No data available</div>
+      </div>
+    )
+  }
+
   const periodCount = period === 'today' ? docsToday : period === 'week' ? docsThisWeek : docsThisMonth
   const chartData = data.map(d => ({
     name: TYPE_LABELS[d.message_type] || d.message_type,
