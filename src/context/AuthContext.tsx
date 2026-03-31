@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import { supabase } from '../lib/supabase'
 import { jwtDecode } from 'jwt-decode'
+import type { Session } from '@supabase/supabase-js'
 
 interface User {
   email: string
@@ -9,14 +11,16 @@ interface User {
 
 interface AuthContextType {
   user: User | null
-  login: (credential: string) => void
-  logout: () => void
+  loading: boolean
+  login: (credential: string) => Promise<void>
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  login: () => {},
-  logout: () => {},
+  loading: true,
+  login: async () => {},
+  logout: async () => {},
 })
 
 export function useAuth() {
@@ -29,42 +33,57 @@ interface GoogleJwtPayload {
   picture: string
 }
 
+function extractUser(session: Session | null): User | null {
+  if (!session?.user) return null
+  const { email, user_metadata } = session.user
+  const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || ''
+  if (adminEmail && email !== adminEmail) return null
+  return {
+    email: email || '',
+    name: user_metadata?.full_name || user_metadata?.name || '',
+    picture: user_metadata?.avatar_url || user_metadata?.picture || '',
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const stored = localStorage.getItem('evara_user')
-    if (stored) {
-      try {
-        setUser(JSON.parse(stored))
-      } catch {
-        localStorage.removeItem('evara_user')
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(extractUser(session))
+      setLoading(false)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(extractUser(session))
       }
-    }
+    )
+
+    return () => subscription.unsubscribe()
   }, [])
 
-  function login(credential: string) {
+  async function login(credential: string) {
     const decoded = jwtDecode<GoogleJwtPayload>(credential)
     const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || ''
     if (adminEmail && decoded.email !== adminEmail) {
       throw new Error('Access denied')
     }
-    const u: User = {
-      email: decoded.email,
-      name: decoded.name,
-      picture: decoded.picture,
-    }
-    setUser(u)
-    localStorage.setItem('evara_user', JSON.stringify(u))
+
+    const { error } = await supabase.auth.signInWithIdToken({
+      provider: 'google',
+      token: credential,
+    })
+    if (error) throw error
   }
 
-  function logout() {
-    setUser(null)
-    localStorage.removeItem('evara_user')
+  async function logout() {
+    await supabase.auth.signOut()
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   )

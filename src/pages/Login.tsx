@@ -22,13 +22,10 @@ export default function Login() {
           <div className="flex justify-center">
             <GoogleLogin
               onSuccess={(response) => {
-                try {
-                  if (response.credential) {
-                    login(response.credential)
-                    navigate('/')
-                  }
-                } catch (err) {
-                  setError(err instanceof Error ? err.message : 'Login failed')
+                if (response.credential) {
+                  login(response.credential)
+                    .then(() => navigate('/'))
+                    .catch((err) => setError(err instanceof Error ? err.message : 'Login failed'))
                 }
               }}
               onError={() => setError('Google login failed')}
